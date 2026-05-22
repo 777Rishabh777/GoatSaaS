@@ -22,9 +22,9 @@ function SignInContent() {
     if (result.error) { setError(result.error); setLoading(false); }
   };
 
-  const fillDemo = (role: "user" | "admin") => {
-    if (role === "admin") { setEmail("admin@goatsaas.com"); setPassword("password"); }
-    else { setEmail("rishabh@goatsaas.com"); setPassword("password"); }
+  const fillDemo = () => {
+    setEmail("rishabh@goatsaas.com"); 
+    setPassword("password"); 
   };
 
   return (
@@ -40,9 +40,7 @@ function SignInContent() {
           
           <h1 className="text-3xl font-bold text-white mb-2">Welcome back</h1>
           <p className="text-zinc-400 mb-8">
-            {from === "/admin" 
-              ? "Sign in to access the Admin Panel." 
-              : "Sign in to your AI command center."}
+            Sign in to your AI command center.
           </p>
 
           {/* Form */}
@@ -95,7 +93,7 @@ function SignInContent() {
           </form>
 
           {/* Hidden Demo quick-fill button for the user (only showing user demo to save them time) */}
-          <button onClick={() => fillDemo("user")} className="mt-6 w-full btn-ghost rounded-xl py-2 text-xs font-mono text-center text-zinc-500 hover:text-zinc-300 border border-transparent hover:border-zinc-800 transition-all">
+          <button onClick={fillDemo} className="mt-6 w-full btn-ghost rounded-xl py-2 text-xs font-mono text-center text-zinc-500 hover:text-zinc-300 border border-transparent hover:border-zinc-800 transition-all">
             👤 One-click Demo Login
           </button>
 

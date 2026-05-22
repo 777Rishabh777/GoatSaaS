@@ -785,9 +785,114 @@ async function updateEcommerceOrderStatus(orderId: string, orgId: string, status
   }
 }
 
+// ─── Dashboard Stats ────────────────────────────────────────────────────────
+
+async function getDashboardStats(orgId: string) {
+  let revenueData: any[] = [];
+  let aiUsageData: any[] = [];
+  let stats: any[] = [];
+  let recentActivity: any[] = [];
+
+  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+  if (!USE_REAL_DB) {
+    // In-memory mock calculation
+    const orders = ECOMMERCE_ORDERS_DB.filter(o => o.orgId === orgId);
+    let totalRevenue = 0;
+    orders.forEach(o => totalRevenue += o.totalAmount);
+    
+    // Fill last 7 months
+    for(let i=6; i>=0; i--) {
+      const d = new Date();
+      d.setMonth(d.getMonth() - i);
+      const mName = monthNames[d.getMonth()];
+      const monthOrders = orders.filter(o => new Date(o.createdAt).getMonth() === d.getMonth());
+      const rev = monthOrders.reduce((acc, curr) => acc + curr.totalAmount, 0);
+      revenueData.push({ month: mName, revenue: rev, users: Math.floor(rev/50) + 10 });
+    }
+
+    aiUsageData = [
+      { day: "Mon", calls: 1240 }, { day: "Tue", calls: 1890 },
+      { day: "Wed", calls: 2300 }, { day: "Thu", calls: 1750 },
+      { day: "Fri", calls: 2890 }, { day: "Sat", calls: 890 },
+      { day: "Sun", calls: 650 },
+    ];
+
+    const activeUsers = USERS_DB.filter(u => u.orgId === orgId).length || 1;
+
+    stats = [
+      { label: "Total Revenue", value: `$${totalRevenue.toLocaleString()}`, delta: "+10.4%", up: true, icon: "💰", color: "emerald" },
+      { label: "Active Users", value: activeUsers.toString(), delta: "+8.2%", up: true, icon: "👥", color: "purple" },
+      { label: "AI API Calls", value: "14,400/day", delta: "Free tier", up: true, icon: "🤖", color: "blue" },
+      { label: "System Uptime", value: "99.98%", delta: "+0.01%", up: true, icon: "⚡", color: "amber" },
+    ];
+
+    const logs = AUDIT_LOG.filter(a => a.userId === orgId || a.userEmail.includes("@")).slice(0, 5);
+    recentActivity = logs.map(l => ({
+      user: l.userEmail,
+      action: l.action,
+      time: new Date(l.timestamp).toLocaleTimeString(),
+      type: l.action.includes("sql") ? "sql" : "ai"
+    }));
+  } else {
+    // Real DB queries
+    try {
+      const ordersResult = await query(`SELECT DATE_TRUNC('month', created_at) as month, SUM(total_amount) as rev FROM ecommerce_orders WHERE org_id = $1 GROUP BY month ORDER BY month ASC LIMIT 7`, [orgId]);
+      
+      for(let i=6; i>=0; i--) {
+        const d = new Date();
+        d.setMonth(d.getMonth() - i);
+        const mName = monthNames[d.getMonth()];
+        const found = ordersResult.find((r: any) => new Date(r.month).getMonth() === d.getMonth());
+        const rev = found ? parseFloat(found.rev) : 0;
+        revenueData.push({ month: mName, revenue: rev, users: Math.floor(rev/50) + 10 });
+      }
+
+      const totalRevRow = await query(`SELECT SUM(total_amount) as total FROM ecommerce_orders WHERE org_id = $1`, [orgId]);
+      const totalRev = totalRevRow[0]?.total ? parseFloat(totalRevRow[0].total) : 0;
+
+      const usersResult = await query(`SELECT COUNT(*) as cnt FROM users WHERE org_id = $1`, [orgId]);
+      const activeUsers = parseInt((usersResult[0] as any)?.cnt || "1");
+
+      aiUsageData = [
+        { day: "Mon", calls: 1240 }, { day: "Tue", calls: 1890 },
+        { day: "Wed", calls: 2300 }, { day: "Thu", calls: 1750 },
+        { day: "Fri", calls: 2890 }, { day: "Sat", calls: 890 },
+        { day: "Sun", calls: 650 },
+      ];
+
+      stats = [
+        { label: "Total Revenue", value: `$${totalRev.toLocaleString()}`, delta: "+10.4%", up: true, icon: "💰", color: "emerald" },
+        { label: "Active Users", value: activeUsers.toString(), delta: "+8.2%", up: true, icon: "👥", color: "purple" },
+        { label: "AI API Calls", value: "14,400/day", delta: "Free tier", up: true, icon: "🤖", color: "blue" },
+        { label: "System Uptime", value: "99.98%", delta: "+0.01%", up: true, icon: "⚡", color: "amber" },
+      ];
+
+      const logs = await query(`SELECT user_email, action, timestamp FROM audit_logs WHERE user_id = $1 OR user_email ILIKE $2 ORDER BY timestamp DESC LIMIT 5`, [orgId, `%@%`]);
+      recentActivity = logs.map((l: any) => ({
+        user: l.user_email,
+        action: l.action,
+        time: new Date(l.timestamp).toLocaleTimeString(),
+        type: l.action.includes("sql") ? "sql" : "ai"
+      }));
+    } catch (e) {
+      console.error("Error fetching dashboard stats:", e);
+    }
+  }
+
+  if (recentActivity.length === 0) {
+    recentActivity = [
+      { user: "System", action: "Dashboard initialized", time: "Just now", type: "system" }
+    ];
+  }
+
+  return { revenueData, aiUsageData, stats, recentActivity };
+}
+
 // ─── Exported DB interface ─────────────────────────────────────────────────────
 
 export const db = {
+  getDashboardStats,
   // Users
   getUserByEmail,
   getUserById,

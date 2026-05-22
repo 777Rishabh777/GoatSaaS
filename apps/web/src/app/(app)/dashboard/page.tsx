@@ -14,37 +14,7 @@ const LogisticsPanel = dynamic(() => import("@/components/LogisticsPanel"), { ss
 const EcommercePanel = dynamic(() => import("@/components/EcommercePanel"), { ssr: false });
 
 
-const revenueData = [
-  { month: "Jan", revenue: 42000, users: 1200 },
-  { month: "Feb", revenue: 55000, users: 1800 },
-  { month: "Mar", revenue: 48000, users: 2100 },
-  { month: "Apr", revenue: 71000, users: 2900 },
-  { month: "May", revenue: 93000, users: 3800 },
-  { month: "Jun", revenue: 87000, users: 4200 },
-  { month: "Jul", revenue: 112000, users: 5100 },
-];
-
-const aiUsageData = [
-  { day: "Mon", calls: 1240 }, { day: "Tue", calls: 1890 },
-  { day: "Wed", calls: 2300 }, { day: "Thu", calls: 1750 },
-  { day: "Fri", calls: 2890 }, { day: "Sat", calls: 890 },
-  { day: "Sun", calls: 650 },
-];
-
-const stats = [
-  { label: "Monthly Revenue", value: "$112,400", delta: "+21.4%", up: true, icon: "💰", color: "emerald" },
-  { label: "Active Users", value: "5,128", delta: "+8.2%", up: true, icon: "👥", color: "purple" },
-  { label: "AI API Calls", value: "14,400/day", delta: "Free tier", up: true, icon: "🤖", color: "blue" },
-  { label: "System Uptime", value: "99.98%", delta: "+0.01%", up: true, icon: "⚡", color: "amber" },
-];
-
-const recentActivity = [
-  { user: "Jane Smith", action: "Ran NL→SQL query", time: "2m ago", type: "sql" },
-  { user: "Mike Chen", action: "AI diagnostic triggered", time: "8m ago", type: "ai" },
-  { user: "Sara Patel", action: "Upgraded to Pro plan", time: "23m ago", type: "upgrade" },
-  { user: "Alex Torres", action: "New user signup", time: "41m ago", type: "signup" },
-  { user: "Priya Kumar", action: "Cloud map exported", time: "1h ago", type: "export" },
-];
+// Dynamic stats are now fetched from the API
 
 // --- Generate 84-day heatmap data (12 weeks) ---
 function generateHeatmapData() {
@@ -279,7 +249,7 @@ const exportPdf = (title: string, columns: string[], data: any[]) => {
   printWindow.document.close();
 };
 
-function StatCard({ stat }: { stat: typeof stats[0] }) {
+function StatCard({ stat }: { stat: { label: string; value: string; delta: string; up: boolean; icon: string; color: string } }) {
   const colorMap: Record<string, string> = {
     emerald: "border-emerald-500/20 bg-emerald-500/5",
     purple: "border-purple-500/20 bg-purple-500/5",
@@ -1734,6 +1704,20 @@ export default function DashboardPage() {
 
   // Theme state
   const [theme, setTheme] = useState<"dark" | "light">("dark");
+
+  const [dashboardData, setDashboardData] = useState<any>(null);
+
+  useEffect(() => {
+    fetch("/api/v1/dashboard/stats")
+      .then(r => r.json())
+      .then(setDashboardData)
+      .catch(e => console.error("Failed to load dashboard stats", e));
+  }, []);
+
+  const revenueData = dashboardData?.revenueData || [];
+  const aiUsageData = dashboardData?.aiUsageData || [];
+  const stats = dashboardData?.stats || [];
+  const recentActivity = dashboardData?.recentActivity || [];
 
   useEffect(() => {
     const saved = localStorage.getItem("theme") as "dark" | "light" | null;

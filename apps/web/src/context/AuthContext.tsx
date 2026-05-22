@@ -19,6 +19,7 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<{ error?: string }>;
+  adminLogin: (email: string, password: string) => Promise<{ error?: string }>;
   signup: (name: string, email: string, password: string) => Promise<{ error?: string }>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
@@ -71,6 +72,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return {};
   };
 
+  const adminLogin = async (email: string, password: string) => {
+    const res = await fetch("/api/auth/admin-login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
+    const data = await res.json();
+    if (!res.ok) return { error: data.error };
+    setUser(data.user);
+    router.push("/admin");
+    return {};
+  };
+
   const logout = async () => {
     await fetch("/api/auth/logout", { method: "POST" });
     setUser(null);
@@ -78,7 +92,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, signup, logout, refreshUser }}>
+    <AuthContext.Provider value={{ user, loading, login, adminLogin, signup, logout, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );
