@@ -1,10 +1,10 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useAuth } from "@/context/AuthContext";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
-export default function SignInPage() {
+function SignInContent() {
   const { login } = useAuth();
   const searchParams = useSearchParams();
   const from = searchParams.get("from");
@@ -186,5 +186,13 @@ export default function SignInPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function SignInPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex bg-zinc-950 items-center justify-center text-zinc-500">Loading...</div>}>
+      <SignInContent />
+    </Suspense>
   );
 }

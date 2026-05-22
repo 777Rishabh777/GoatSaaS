@@ -152,7 +152,7 @@ export async function validateApiKey(rawKey: string, ip?: string): Promise<ApiKe
 
   // Update usage stats
   await db.updateApiKeyUsage(record.id, ip ?? "127.0.0.1");
-  incrementQuota(record.orgId, record.plan);
+  incrementQuota(record.orgId);
 
   return { valid: true, keyRecord: record };
 }
