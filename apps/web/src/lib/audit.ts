@@ -26,6 +26,7 @@ export type AuditAction =
   | "admin:user_activated"
   | "admin:flag_toggled"
   | "admin:email_broadcast"
+  | "admin:login_failed"
   | "admin:anomaly_config"
   | "billing:checkout_started"
   | "billing:plan_upgraded"
