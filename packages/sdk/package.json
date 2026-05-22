@@ -1,0 +1,25 @@
+{
+  "name": "goatsaas",
+  "version": "0.1.0",
+  "description": "Official JavaScript/TypeScript SDK for GOATSaaS — AI-powered telemetry platform",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "module": "dist/index.mjs",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "node test.mjs",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": ["goatsaas", "ai", "telemetry", "nlp", "sql", "sdk"],
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}
