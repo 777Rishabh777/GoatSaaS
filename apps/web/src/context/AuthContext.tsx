@@ -34,11 +34,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const refreshUser = async () => {
     try {
-      const r = await fetch("/api/auth/me");
+      const r = await fetch("/api/auth/me", { credentials: "include" });
+      if (r.status === 401) {
+        // Stale or invalid cookie — clear it so the user isn't stuck in a loop
+        await fetch("/api/auth/logout", { method: "POST", credentials: "include" }).catch(() => {});
+        setUser(null);
+        return;
+      }
       const data = await r.json();
       if (data.user) setUser(data.user);
+      else setUser(null);
     } catch (e) {
-      console.error("Error refreshing user session:", e);
+      // Network error (server starting up) — don't log out, just set null
+      console.warn("Could not reach /api/auth/me:", e);
+      setUser(null);
     }
   };
 
@@ -50,11 +59,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const res = await fetch("/api/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      credentials: "include",
       body: JSON.stringify({ email, password }),
     });
-    const data = await res.json();
-    if (!res.ok) return { error: data.error };
+    const data = await res.json().catch(() => ({} as any));
+    if (!res.ok) {
+      return { error: (data?.hint || data?.detail || data?.error || "Login failed") as string };
+    }
     setUser(data.user);
+    // Small delay so the cookie is committed before navigation
+    await new Promise(r => setTimeout(r, 100));
     router.push(data.user.role === "admin" ? "/admin" : "/dashboard");
     return {};
   };
@@ -63,11 +77,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const res = await fetch("/api/auth/signup", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      credentials: "include",
       body: JSON.stringify({ name, email, password }),
     });
-    const data = await res.json();
-    if (!res.ok) return { error: data.error };
+    const data = await res.json().catch(() => ({} as any));
+    if (!res.ok) {
+      return { error: (data?.hint || data?.detail || data?.error || "Signup failed") as string };
+    }
     setUser(data.user);
+    await new Promise(r => setTimeout(r, 100));
     router.push("/dashboard");
     return {};
   };
@@ -76,17 +94,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const res = await fetch("/api/auth/admin-login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      credentials: "include",
       body: JSON.stringify({ email, password }),
     });
-    const data = await res.json();
-    if (!res.ok) return { error: data.error };
+    const data = await res.json().catch(() => ({} as any));
+    if (!res.ok) {
+      return { error: (data?.hint || data?.detail || data?.error || "Login failed") as string };
+    }
     setUser(data.user);
+    await new Promise(r => setTimeout(r, 100));
     router.push("/admin");
     return {};
   };
 
   const logout = async () => {
-    await fetch("/api/auth/logout", { method: "POST" });
+    await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
     setUser(null);
     router.push("/sign-in");
   };

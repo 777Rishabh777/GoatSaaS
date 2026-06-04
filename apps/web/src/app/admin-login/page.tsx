@@ -17,8 +17,21 @@ function AdminSignInContent() {
     e.preventDefault();
     setError("");
     setLoading(true);
-    const result = await adminLogin(email, password);
-    if (result.error) { setError(result.error); setLoading(false); }
+    try {
+      const result = await adminLogin(email, password);
+      if (result.error) {
+        setError(result.error);
+        setLoading(false);
+      } else {
+        // Reset loading state after 5 seconds to prevent UI freeze on slow route transitions
+        setTimeout(() => {
+          setLoading(false);
+        }, 5000);
+      }
+    } catch (err) {
+      setError("An unexpected error occurred.");
+      setLoading(false);
+    }
   };
 
   return (

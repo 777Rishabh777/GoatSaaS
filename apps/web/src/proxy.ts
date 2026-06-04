@@ -1,5 +1,5 @@
 /**
- * Next.js Middleware — Route Protection
+ * Next.js Proxy — Route Protection (Next.js 16+ convention)
  * Runs on every request BEFORE rendering.
  *
  * Rules:
@@ -14,7 +14,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { jwtVerify } from "jose";
 
-const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || "goat-saas-super-secret-key-2024");
+const secretString = process.env.NEXTAUTH_SECRET || process.env.JWT_SECRET || "goat-saas-super-secret-key-2024";
+const JWT_SECRET = new TextEncoder().encode(secretString);
 
 async function verifyTokenEdge(token: string) {
   try {
@@ -63,7 +64,7 @@ export async function proxy(req: NextRequest) {
   }
 
   // ── Auth pages — redirect if already logged in ────────────────────────────
-  if (pathname === "/sign-in" || pathname === "/sign-up") {
+  if (pathname === "/sign-in" || pathname === "/sign-up" || pathname === "/admin-login") {
     if (payload) {
       const dest = payload.role === "admin" ? "/admin" : "/dashboard";
       return NextResponse.redirect(new URL(dest, req.url));

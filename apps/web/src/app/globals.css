@@ -5,27 +5,27 @@
 @tailwind utilities;
 
 :root {
-  --accent: #8b5cf6;
-  --accent-glow: rgba(139, 92, 246, 0.15);
-  --emerald: #10b981;
-  --emerald-glow: rgba(16, 185, 129, 0.2);
-  --bg-0: #000000;
-  --bg-1: #050505;
-  --bg-2: #0a0a0f;
-  --bg-card: rgba(255, 255, 255, 0.03);
-  --bg-card-hover: rgba(255, 255, 255, 0.06);
+  --accent: #00e5ff;
+  --accent-glow: rgba(0, 229, 255, 0.35);
+  --emerald: #ff007f;
+  --emerald-glow: rgba(255, 0, 127, 0.35);
+  --bg-0: #05050a;
+  --bg-1: #0a0a14;
+  --bg-2: #10101e;
+  --bg-card: rgba(255, 255, 255, 0.02);
+  --bg-card-hover: rgba(255, 255, 255, 0.05);
   --border: rgba(255, 255, 255, 0.08);
-  --border-hover: rgba(255, 255, 255, 0.15);
+  --border-hover: rgba(0, 229, 255, 0.25);
   --text-primary: #ffffff;
   --text-secondary: #a1a1aa;
   --text-muted: #52525b;
 }
 
 html.light {
-  --accent: #7c3aed;
-  --accent-glow: rgba(124, 58, 237, 0.15);
-  --emerald: #059669;
-  --emerald-glow: rgba(5, 150, 105, 0.2);
+  --accent: #00b8cc;
+  --accent-glow: rgba(0, 184, 204, 0.15);
+  --emerald: #d6006b;
+  --emerald-glow: rgba(214, 0, 107, 0.2);
   --bg-0: #f8fafc;
   --bg-1: #f1f5f9;
   --bg-2: #e2e8f0;
@@ -69,8 +69,8 @@ body {
 /* Premium scrollbar */
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(139, 92, 246, 0.4); border-radius: 2px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(139, 92, 246, 0.7); }
+::-webkit-scrollbar-thumb { background: rgba(0, 229, 255, 0.4); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(0, 229, 255, 0.7); }
 
 /* Glass morphism card */
 .glass {
@@ -91,10 +91,10 @@ body {
 
 /* Glow effects */
 .glow-purple {
-  box-shadow: 0 0 30px rgba(139, 92, 246, 0.15), 0 0 60px rgba(139, 92, 246, 0.05);
+  box-shadow: 0 0 30px rgba(0, 229, 255, 0.25), 0 0 60px rgba(0, 229, 255, 0.1);
 }
 .glow-emerald {
-  box-shadow: 0 0 30px rgba(16, 185, 129, 0.15), 0 0 60px rgba(16, 185, 129, 0.05);
+  box-shadow: 0 0 30px rgba(255, 0, 127, 0.25), 0 0 60px rgba(255, 0, 127, 0.1);
 }
 
 /* Gradient text */
@@ -105,13 +105,13 @@ body {
   background-clip: text;
 }
 .gradient-text-purple {
-  background: linear-gradient(135deg, #c4b5fd 0%, #8b5cf6 50%, #6d28d9 100%);
+  background: linear-gradient(135deg, #ffffff 0%, #00e5ff 50%, #0088cc 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 .gradient-text-emerald {
-  background: linear-gradient(135deg, #6ee7b7 0%, #10b981 50%, #059669 100%);
+  background: linear-gradient(135deg, #ffffff 0%, #ff007f 50%, #c50058 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -119,14 +119,14 @@ body {
 
 /* Button styles */
 .btn-primary {
-  background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+  background: linear-gradient(135deg, #00e5ff, #0088cc);
   color: white;
-  border: 1px solid rgba(139, 92, 246, 0.3);
+  border: 1px solid rgba(0, 229, 255, 0.5);
   transition: all 0.2s ease;
 }
 .btn-primary:hover {
-  background: linear-gradient(135deg, #7c3aed, #5b21b6);
-  box-shadow: 0 0 20px rgba(139, 92, 246, 0.4);
+  background: linear-gradient(135deg, #00ffff, #00aaff);
+  box-shadow: 0 0 20px rgba(0, 229, 255, 0.6);
   transform: translateY(-1px);
 }
 
@@ -144,17 +144,17 @@ body {
 
 /* Animated gradient background */
 .animated-bg {
-  background: radial-gradient(ellipse at 20% 50%, rgba(139, 92, 246, 0.08) 0%, transparent 60%),
-              radial-gradient(ellipse at 80% 20%, rgba(16, 185, 129, 0.05) 0%, transparent 60%),
-              radial-gradient(ellipse at 50% 80%, rgba(59, 130, 246, 0.05) 0%, transparent 60%),
+  background: radial-gradient(ellipse at 20% 50%, rgba(0, 229, 255, 0.06) 0%, transparent 60%),
+              radial-gradient(ellipse at 80% 20%, rgba(255, 0, 127, 0.05) 0%, transparent 60%),
+              radial-gradient(ellipse at 50% 80%, rgba(59, 130, 246, 0.04) 0%, transparent 60%),
               var(--bg-0);
   transition: background 0.3s ease;
 }
 
 html.light .animated-bg {
-  background: radial-gradient(ellipse at 20% 50%, rgba(139, 92, 246, 0.04) 0%, transparent 60%),
-              radial-gradient(ellipse at 80% 20%, rgba(16, 185, 129, 0.03) 0%, transparent 60%),
-              radial-gradient(ellipse at 50% 80%, rgba(59, 130, 246, 0.03) 0%, transparent 60%),
+  background: radial-gradient(ellipse at 20% 50%, rgba(0, 229, 255, 0.03) 0%, transparent 60%),
+              radial-gradient(ellipse at 80% 20%, rgba(255, 0, 127, 0.02) 0%, transparent 60%),
+              radial-gradient(ellipse at 50% 80%, rgba(59, 130, 246, 0.02) 0%, transparent 60%),
               var(--bg-0);
 }
 
@@ -171,12 +171,12 @@ html.light .animated-bg {
   letter-spacing: 0.05em;
   text-transform: uppercase;
 }
-.badge-active { background: rgba(16,185,129,0.1); color: #10b981; border: 1px solid rgba(16,185,129,0.2); }
-.badge-suspended { background: rgba(239,68,68,0.1); color: #ef4444; border: 1px solid rgba(239,68,68,0.2); }
-.badge-free { background: rgba(107,114,128,0.1); color: #9ca3af; border: 1px solid rgba(107,114,128,0.2); }
-.badge-pro { background: rgba(139,92,246,0.1); color: #a78bfa; border: 1px solid rgba(139,92,246,0.2); }
-.badge-enterprise { background: rgba(245,158,11,0.1); color: #f59e0b; border: 1px solid rgba(245,158,11,0.2); }
-.badge-all { background: rgba(59,130,246,0.1); color: #60a5fa; border: 1px solid rgba(59,130,246,0.2); }
+.badge-active { background: rgba(255,0,127,0.15); color: #ff007f; border: 1px solid rgba(255,0,127,0.4); }
+.badge-suspended { background: rgba(239,68,68,0.15); color: #ef4444; border: 1px solid rgba(239,68,68,0.4); }
+.badge-free { background: rgba(107,114,128,0.15); color: #9ca3af; border: 1px solid rgba(107,114,128,0.4); }
+.badge-pro { background: rgba(0,229,255,0.15); color: #00e5ff; border: 1px solid rgba(0,229,255,0.4); }
+.badge-enterprise { background: rgba(245,158,11,0.15); color: #f59e0b; border: 1px solid rgba(245,158,11,0.4); }
+.badge-all { background: rgba(59,130,246,0.15); color: #60a5fa; border: 1px solid rgba(59,130,246,0.4); }
 .glow-free { box-shadow: 0 0 20px rgba(107,114,128,0.1); }
 
 /* Input styles */
@@ -271,9 +271,9 @@ html.light .animated-bg {
   border-color: rgba(255,255,255,0.06);
 }
 .sidebar-item.active {
-  background: rgba(139,92,246,0.12);
-  color: #c4b5fd;
-  border-color: rgba(139,92,246,0.2);
+  background: rgba(0,229,255,0.12);
+  color: #00e5ff;
+  border-color: rgba(0,229,255,0.3);
 }
 
 /* Responsive mono font */

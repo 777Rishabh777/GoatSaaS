@@ -11,8 +11,8 @@ export const GET = withApiAuth(async (req, ctx) => {
 export const POST = withApiAuth(async (req, ctx) => {
   try {
     const body = await req.json();
-    if (!body.customerEmail || !body.items || !body.items.length) {
-      return NextResponse.json({ error: "Customer email and items are required" }, { status: 400 });
+    if (!body.customerId || !body.items || !body.items.length) {
+      return NextResponse.json({ error: "Customer ID and items are required" }, { status: 400 });
     }
 
     let totalAmount = 0;
@@ -31,7 +31,7 @@ export const POST = withApiAuth(async (req, ctx) => {
     const order = {
       id: orderId,
       orgId: ctx.orgId,
-      customerEmail: body.customerEmail,
+      customerId: body.customerId,
       totalAmount,
       status: body.status || "pending",
       paymentStatus: body.paymentStatus || "unpaid",

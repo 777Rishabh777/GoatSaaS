@@ -35,16 +35,8 @@ function Navbar() {
     >
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2.5 group">
-          <div
-            className="w-9 h-9 rounded-xl flex items-center justify-center text-white font-black text-lg transition-transform group-hover:scale-110"
-            style={{ background: "linear-gradient(135deg, #7c3aed, #2563eb)" }}
-          >
-            G
-          </div>
-          <span className="font-black text-xl text-white tracking-tight">
-            GOAT<span className="text-purple-400">SaaS</span>
-          </span>
+        <Link href="/" className="flex items-center group">
+          <img src="/logo.png" alt="GOATSaaS Logo" className="h-16 w-auto object-contain drop-shadow-md transition-transform group-hover:scale-105" />
         </Link>
 
         {/* Desktop nav */}
@@ -72,7 +64,7 @@ function Navbar() {
           <Link
             href="/sign-up"
             className="text-sm font-semibold text-white px-5 py-2.5 rounded-xl transition-all duration-300 hover:opacity-90 hover:-translate-y-0.5"
-            style={{ background: "linear-gradient(135deg, #7c3aed, #2563eb)" }}
+            style={{ background: "linear-gradient(135deg, #00e5ff, #0088cc)" }}
           >
             Get started →
           </Link>
@@ -104,7 +96,7 @@ function Navbar() {
           ))}
           <div className="pt-4 flex flex-col gap-2 border-t border-zinc-900">
             <Link href="/sign-in" onClick={() => setOpen(false)} className="text-sm text-center text-zinc-400 py-2">Sign in</Link>
-            <Link href="/sign-up" onClick={() => setOpen(false)} className="text-sm font-semibold text-white text-center py-2.5 rounded-xl" style={{ background: "linear-gradient(135deg, #7c3aed, #2563eb)" }}>
+            <Link href="/sign-up" onClick={() => setOpen(false)} className="text-sm font-semibold text-white text-center py-2.5 rounded-xl" style={{ background: "linear-gradient(135deg, #00e5ff, #0088cc)" }}>
               Get started →
             </Link>
           </div>
@@ -121,9 +113,9 @@ function Footer() {
         {/* Final CTA block */}
         <div
           className="text-center mb-20 py-20 rounded-3xl relative overflow-hidden border border-purple-500/10"
-          style={{ background: "radial-gradient(ellipse at 50% -20%, rgba(139,92,246,0.12) 0%, transparent 70%)" }}
+          style={{ background: "radial-gradient(ellipse at 50% -20%, rgba(0,229,255,0.15) 0%, transparent 70%)" }}
         >
-          <div className="absolute inset-0 rounded-3xl" style={{ background: "linear-gradient(180deg, rgba(139,92,246,0.04), transparent)" }} />
+          <div className="absolute inset-0 rounded-3xl" style={{ background: "linear-gradient(180deg, rgba(0,229,255,0.05), transparent)" }} />
           <div className="relative">
             <span className="text-xs font-mono text-purple-400 border border-purple-500/30 px-3 py-1.5 rounded-full bg-purple-500/5 inline-block mb-8">
               Start for free — no credit card required
@@ -131,7 +123,7 @@ function Footer() {
             <h2 className="text-5xl md:text-6xl font-black text-white mb-4 leading-tight">
               The last dashboard
               <br />
-              <span className="bg-clip-text text-transparent" style={{ backgroundImage: "linear-gradient(135deg, #8b5cf6, #3b82f6, #10b981)" }}>
+              <span className="bg-clip-text text-transparent" style={{ backgroundImage: "linear-gradient(135deg, #00e5ff, #ff007f, #0088cc)" }}>
                 you&apos;ll ever need.
               </span>
             </h2>
@@ -141,7 +133,7 @@ function Footer() {
             <Link
               href="/sign-up"
               className="inline-block px-10 py-4 rounded-2xl text-base font-semibold text-white transition-all hover:opacity-90 hover:-translate-y-1 duration-300"
-              style={{ background: "linear-gradient(135deg, #7c3aed, #2563eb)" }}
+              style={{ background: "linear-gradient(135deg, #00e5ff, #0088cc)" }}
             >
               Launch your command center →
             </Link>
@@ -151,9 +143,8 @@ function Footer() {
         {/* Footer links */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-10 mb-14">
           <div>
-            <div className="flex items-center gap-2 mb-5">
-              <div className="w-7 h-7 rounded-lg flex items-center justify-center text-white font-black text-sm" style={{ background: "linear-gradient(135deg, #7c3aed, #2563eb)" }}>G</div>
-              <span className="font-bold text-white">GOATSaaS</span>
+            <div className="flex items-center mb-5">
+              <img src="/logo.png" alt="GOATSaaS Logo" className="h-12 w-auto object-contain" />
             </div>
             <p className="text-xs text-zinc-600 leading-relaxed">The autonomous AI command center for modern SaaS engineering teams.</p>
           </div>

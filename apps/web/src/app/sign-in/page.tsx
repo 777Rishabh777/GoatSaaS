@@ -18,13 +18,40 @@ function SignInContent() {
     e.preventDefault();
     setError("");
     setLoading(true);
-    const result = await login(email, password);
-    if (result.error) { setError(result.error); setLoading(false); }
+    try {
+      const result = await login(email, password);
+      if (result.error) {
+        setError(result.error);
+        setLoading(false);
+      } else {
+        // Reset loading state after 5 seconds to prevent UI freeze on slow route transitions
+        setTimeout(() => {
+          setLoading(false);
+        }, 5000);
+      }
+    } catch (err) {
+      if (err instanceof TypeError && (err as TypeError).message === 'Failed to fetch') {
+        setError("Cannot connect to server. Please wait a moment and try again.");
+      } else {
+        setError("An unexpected error occurred. Please try again.");
+      }
+      setLoading(false);
+    }
   };
 
-  const fillDemo = () => {
-    setEmail("rishabh@goatsaas.com"); 
-    setPassword("password"); 
+  const fillDemo = async () => {
+    setError("");
+    setLoading(true);
+    try {
+      const result = await login("rishabh@goatsaas.com", "password");
+      if (result.error) {
+        setError(result.error);
+        setLoading(false);
+      }
+    } catch (err) {
+      setError("Cannot connect to server. Please wait and try again.");
+      setLoading(false);
+    }
   };
 
   return (
@@ -33,9 +60,8 @@ function SignInContent() {
       <div className="w-full lg:w-[45%] flex flex-col justify-center px-8 sm:px-16 lg:px-24 xl:px-32 relative z-10">
         <div className="w-full max-w-md mx-auto">
           {/* Logo */}
-          <Link href="/" className="inline-flex items-center gap-3 mb-10">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center text-white font-black text-lg">G</div>
-            <span className="text-xl font-bold text-white">GOAT<span className="text-purple-400">SaaS</span></span>
+          <Link href="/" className="inline-flex items-center mb-10">
+            <img src="/logo.png" alt="GOATSaaS Logo" className="h-20 w-auto object-contain drop-shadow-md" />
           </Link>
           
           <h1 className="text-3xl font-bold text-white mb-2">Welcome back</h1>

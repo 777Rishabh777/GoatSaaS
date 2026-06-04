@@ -1,6 +1,12 @@
 import jwt from "jsonwebtoken";
 
-const JWT_SECRET = process.env.JWT_SECRET || "goat-saas-super-secret-key-2024";
+function getJwtSecret(): string {
+  const secret = process.env.NEXTAUTH_SECRET || process.env.JWT_SECRET;
+  if (!secret) {
+    throw new Error("Missing NEXTAUTH_SECRET (or JWT_SECRET) in apps/web/.env.local");
+  }
+  return secret;
+}
 
 export interface UserPayload {
   id: string;
@@ -15,12 +21,14 @@ export interface UserPayload {
 }
 
 export function signToken(payload: UserPayload): string {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: "7d" });
+  return jwt.sign(payload, getJwtSecret(), { expiresIn: "7d" });
 }
 
-export function verifyToken(token: string): UserPayload | null {
+export function verifyToken(token: string | undefined): UserPayload | null {
+  if (!token) return null;
+
   try {
-    return jwt.verify(token, JWT_SECRET) as UserPayload;
+    return jwt.verify(token, getJwtSecret()) as UserPayload;
   } catch {
     return null;
   }
@@ -34,7 +42,7 @@ export const USERS_DB: (UserPayload & { password: string; createdAt: string; las
     name: "Super Admin",
     role: "admin",
     plan: "enterprise",
-    password: "$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi", // "password"
+    password: "$2b$10$AhKkOeoccvLnw2x67/9Yr.3JyaeDmEsCqTX3sBWQHRxd.wY3Zx5NW", // "password"
     createdAt: "2024-01-01T00:00:00Z",
     lastLogin: new Date().toISOString(),
     status: "active",
@@ -49,7 +57,7 @@ export const USERS_DB: (UserPayload & { password: string; createdAt: string; las
     name: "Rishabh Dev",
     role: "user",
     plan: "pro",
-    password: "$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi", // "password"
+    password: "$2b$10$AhKkOeoccvLnw2x67/9Yr.3JyaeDmEsCqTX3sBWQHRxd.wY3Zx5NW", // "password"
     createdAt: "2024-02-15T10:30:00Z",
     lastLogin: new Date().toISOString(),
     status: "active",
@@ -64,7 +72,7 @@ export const USERS_DB: (UserPayload & { password: string; createdAt: string; las
     name: "Jane Smith",
     role: "user",
     plan: "enterprise",
-    password: "$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi",
+    password: "$2b$10$AhKkOeoccvLnw2x67/9Yr.3JyaeDmEsCqTX3sBWQHRxd.wY3Zx5NW", // "password"
     createdAt: "2024-03-10T08:00:00Z",
     lastLogin: "2024-05-18T14:22:00Z",
     status: "active",
@@ -79,7 +87,7 @@ export const USERS_DB: (UserPayload & { password: string; createdAt: string; las
     name: "Mike Chen",
     role: "user",
     plan: "free",
-    password: "$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi",
+    password: "$2b$10$AhKkOeoccvLnw2x67/9Yr.3JyaeDmEsCqTX3sBWQHRxd.wY3Zx5NW", // "password"
     createdAt: "2024-04-20T12:45:00Z",
     lastLogin: "2024-05-15T09:10:00Z",
     status: "active",
@@ -94,7 +102,7 @@ export const USERS_DB: (UserPayload & { password: string; createdAt: string; las
     name: "Sara Patel",
     role: "user",
     plan: "pro",
-    password: "$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi",
+    password: "$2b$10$AhKkOeoccvLnw2x67/9Yr.3JyaeDmEsCqTX3sBWQHRxd.wY3Zx5NW", // "password"
     createdAt: "2024-05-01T16:00:00Z",
     lastLogin: "2024-05-19T11:30:00Z",
     status: "suspended",

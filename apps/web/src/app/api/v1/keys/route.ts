@@ -10,7 +10,6 @@ export async function OPTIONS() { return handleOptions(); }
 
 export async function GET(req: NextRequest) {
   const token = req.cookies.get("goat-session")?.value;
-  if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const payload = verifyToken(token);
   if (!payload) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
@@ -20,11 +19,10 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   const token = req.cookies.get("goat-session")?.value;
-  if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const payload = verifyToken(token);
   if (!payload) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { name } = await req.json();
+  const { name, projectId } = await req.json();
   if (!name?.trim()) {
     return NextResponse.json({ error: "Key name is required" }, { status: 400 });
   }
@@ -35,6 +33,7 @@ export async function POST(req: NextRequest) {
   const { rawKey, record } = await generateApiKey({
     userId: payload.id,
     orgId,
+    projectId: projectId || null,
     name: name.trim(),
     plan: payload.plan as any,
   });
@@ -55,13 +54,24 @@ export async function POST(req: NextRequest) {
 
 export async function DELETE(req: NextRequest) {
   const token = req.cookies.get("goat-session")?.value;
-  if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const payload = verifyToken(token);
   if (!payload) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { keyId } = await req.json();
+  const url = new URL(req.url);
+  const fromQuery = url.searchParams.get("id");
+  const body = await req.json().catch(() => ({} as any));
+  const keyId = fromQuery || body.keyId;
+
+  if (!keyId) {
+    return NextResponse.json({ error: "keyId (or ?id=) is required" }, { status: 400 });
+  }
+
   const ip = req.headers.get("x-forwarded-for") ?? "127.0.0.1";
-  const orgId = payload.orgId ?? payload.id;
+  const orgId = payload.orgId;
+
+  if (!orgId) {
+    return NextResponse.json({ error: "Org context missing" }, { status: 400 });
+  }
 
   const ok = await revokeApiKey(keyId, orgId);
   if (!ok) return NextResponse.json({ error: "Key not found" }, { status: 404 });

@@ -14,6 +14,7 @@ import { db } from "./db";
 export interface ApiKey {
   id: string;
   orgId: string;
+  projectId?: string | null;
   userId: string;
   name: string;
   keyHash: string;       // SHA-256 of the raw key — never stored raw
@@ -24,6 +25,7 @@ export interface ApiKey {
   lastUsedAt: string | null;
   lastUsedIp: string | null;
   revokedAt: string | null;
+  expiresAt: string | null;
   callsToday: number;
   totalCalls: number;
 }
@@ -51,6 +53,7 @@ export const API_KEYS_DB: ApiKey[] = [
     lastUsedAt: new Date(Date.now() - 3600000).toISOString(),
     lastUsedIp: "103.21.58.12",
     revokedAt: null,
+    expiresAt: null,
     callsToday: 412,
     totalCalls: 2840,
   },
@@ -93,6 +96,7 @@ function checkRateLimit(keyId: string, plan: string): { allowed: boolean; retryA
 export async function generateApiKey(opts: {
   userId: string;
   orgId: string;
+  projectId?: string | null;
   name: string;
   plan: "free" | "pro" | "enterprise";
 }): Promise<{ rawKey: string; record: ApiKey }> {
@@ -104,6 +108,7 @@ export async function generateApiKey(opts: {
   const record: ApiKey = {
     id: `key_${Date.now()}_${crypto.randomBytes(4).toString("hex")}`,
     orgId: opts.orgId,
+    projectId: opts.projectId,
     userId: opts.userId,
     name: opts.name,
     keyHash,
@@ -114,6 +119,7 @@ export async function generateApiKey(opts: {
     lastUsedAt: null,
     lastUsedIp: null,
     revokedAt: null,
+    expiresAt: null,
     callsToday: 0,
     totalCalls: 0,
   };

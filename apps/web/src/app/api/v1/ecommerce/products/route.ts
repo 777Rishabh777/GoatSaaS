@@ -23,6 +23,8 @@ export const POST = withApiAuth(async (req, ctx) => {
       price: Number(body.price),
       stockQuantity: Number(body.stockQuantity) || 0,
       category: body.category || "Uncategorized",
+      imageUrl: body.imageUrl || null,
+      sku: body.sku || null,
       status: body.status || "active",
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),

@@ -15,8 +15,17 @@ export default function SignUpPage() {
     e.preventDefault();
     setError("");
     setLoading(true);
-    const result = await signup(name, email, password);
-    if (result.error) { setError(result.error); setLoading(false); }
+    try {
+      const result = await signup(name, email, password);
+      if (result.error) { setError(result.error); setLoading(false); }
+    } catch (err) {
+      if (err instanceof TypeError && (err as TypeError).message === 'Failed to fetch') {
+        setError("Cannot connect to server. Please wait a moment and try again.");
+      } else {
+        setError("An unexpected error occurred. Please try again.");
+      }
+      setLoading(false);
+    }
   };
 
   const strength = password.length === 0 ? 0 : password.length < 6 ? 1 : password.length < 10 ? 2 : 3;

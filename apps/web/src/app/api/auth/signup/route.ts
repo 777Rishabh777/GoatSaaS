@@ -26,6 +26,9 @@ export async function POST(req: NextRequest) {
     const initials = name.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2);
     const now = new Date().toISOString();
     const orgId = `org_${Date.now()}`;
+    const orgName = `${name}'s Workspace`;
+
+    await db.createOrganization(orgId, orgName, "free");
 
     const newUser = {
       id: `usr_${Date.now()}`,
@@ -39,7 +42,7 @@ export async function POST(req: NextRequest) {
       status: "active",
       avatar: initials,
       orgId,
-      orgName: `${name}'s Workspace`,
+      orgName,
       orgRole: "owner" as const,
     };
 
@@ -84,7 +87,29 @@ export async function POST(req: NextRequest) {
     return response;
   } catch (err) {
     console.error("[Signup]", err);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+
+    const isDev = process.env.NODE_ENV !== "production";
+    if (!isDev) {
+      return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    }
+
+    const detail = err instanceof Error ? err.message : String(err);
+    const code = (err as any)?.code as string | undefined;
+
+    let hint: string | undefined;
+    if (detail.includes("Missing NEXTAUTH_SECRET")) {
+      hint = "Set NEXTAUTH_SECRET (or JWT_SECRET) in apps/web/.env.local, then restart the dev server.";
+    } else if (code === "23503") {
+      hint = "Organization/user foreign key failed. Run cd apps/web && node migrate.js, then retry signup.";
+    } else if (code === "23505") {
+      hint = "Email already exists. Try a different email or sign in.";
+    } else if (code === "42P01") {
+      hint = "Database tables are missing. If DATABASE_URL is set, run: cd apps/web && node migrate.js (then restart).";
+    } else if (code === "28P01") {
+      hint = "Database auth failed (bad DATABASE_URL username/password).";
+    }
+
+    return NextResponse.json({ error: "Internal server error", detail, code, hint }, { status: 500 });
   }
 }
 

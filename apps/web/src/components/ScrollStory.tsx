@@ -758,6 +758,75 @@ function KbVisual() {
 }
 
 // ─────────────────────────────────────────────
+// SaaS Visual
+// ─────────────────────────────────────────────
+function SaasVisual() {
+  return (
+    <VisualCard accent="#f43f5e">
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <span className="text-sm font-semibold text-white">SaaS Subscriptions</span>
+          <span className="text-[9px] font-mono text-rose-400">14 Active Apps</span>
+        </div>
+        <div className="grid grid-cols-2 gap-2">
+          <div className="rounded-xl bg-zinc-900/60 border border-zinc-800 p-3">
+            <div className="text-[9px] text-zinc-500 mb-1">Total Spend</div>
+            <div className="text-sm font-bold text-white font-mono">$12,450/mo</div>
+          </div>
+          <div className="rounded-xl bg-zinc-900/60 border border-zinc-800 p-3">
+            <div className="text-[9px] text-zinc-500 mb-1">Unused Licenses</div>
+            <div className="text-sm font-bold text-rose-400 font-mono">$840/mo</div>
+          </div>
+        </div>
+        <div className="space-y-2 mt-2">
+          {[{name:"GitHub Enterprise", cost:"$2,400", renews:"in 14 days"}, {name:"AWS Hosting", cost:"$8,100", renews:"in 2 days"}].map((s, i) => (
+            <div key={i} className="flex items-center justify-between rounded-xl border border-rose-500/20 bg-rose-500/5 p-3">
+              <div>
+                <div className="text-[9px] font-semibold text-rose-400">{s.name}</div>
+                <div className="text-[8px] text-zinc-500 font-mono mt-0.5">Renews {s.renews}</div>
+              </div>
+              <div className="text-[10px] font-mono text-white">{s.cost}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </VisualCard>
+  );
+}
+
+// ─────────────────────────────────────────────
+// Audire Visual
+// ─────────────────────────────────────────────
+function AudireVisual() {
+  return (
+    <VisualCard accent="#eab308">
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <span className="text-sm font-semibold text-white">AI Search Visibility</span>
+          <span className="text-[9px] font-mono text-yellow-400">Grade: B+</span>
+        </div>
+        <div className="rounded-xl border border-yellow-500/30 bg-yellow-500/10 p-3 text-center">
+          <div className="text-2xl font-black text-yellow-400 mb-1">84/100</div>
+          <div className="text-[9px] text-zinc-400">Overall Visibility Score</div>
+        </div>
+        <div className="space-y-2">
+          <div className="text-[9px] text-zinc-500 font-mono mb-1">Signal Checks:</div>
+          {[{check:"LLM Visibility", score:70, color:"bg-yellow-400"}, {check:"Crawlability", score:88, color:"bg-emerald-400"}, {check:"Structure", score:76, color:"bg-yellow-400"}].map((c, i) => (
+            <div key={i} className="flex items-center gap-3 text-[9px]">
+              <span className="text-zinc-300 w-20">{c.check}</span>
+              <div className="flex-1 h-1.5 rounded-full bg-zinc-800 overflow-hidden">
+                <div className={`h-full ${c.color}`} style={{ width: `${c.score}%` }} />
+              </div>
+              <span className="font-mono text-zinc-500 w-6 text-right">{c.score}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </VisualCard>
+  );
+}
+
+// ─────────────────────────────────────────────
 // Logo strip (tech stack)
 // ─────────────────────────────────────────────
 function TechStrip() {
@@ -881,6 +950,37 @@ export default function ScrollStoryEngine() {
         visual={<KbVisual />}
         reverse
         accent="#10b981"
+      />
+
+      {/* Feature 5 — SaaS Management */}
+      <FeatureSection
+        eyebrow="SaaS Spend Management"
+        headline={"Track your SaaS.\nNever miss a renewal."}
+        sub="Connect all your SaaS subscriptions in one place. Automatically identify unused licenses and optimize your monthly software spend."
+        bullets={[
+          "Auto-discovery of SaaS spending via corporate cards",
+          "Renewal alerts 30, 14, and 3 days before charge",
+          "Identify duplicate subscriptions and unused seats",
+          "Department-level spend attribution and budgets",
+        ]}
+        visual={<SaasVisual />}
+        accent="#f43f5e"
+      />
+
+      {/* Feature 6 — AI Audit */}
+      <FeatureSection
+        eyebrow="AI Search Visibility"
+        headline={"Optimize for AI.\nBe the default answer."}
+        sub="Audit how LLMs like ChatGPT and Claude view your brand. Improve your structure and visibility to ensure AI agents recommend your product."
+        bullets={[
+          "Simulate brand queries against top foundation models",
+          "12-point technical audit for AI crawlability",
+          "Actionable fix-packs to improve your LLM visibility score",
+          "Weekly re-audits to track your progress over time",
+        ]}
+        visual={<AudireVisual />}
+        reverse
+        accent="#eab308"
       />
 
       <Testimonials />

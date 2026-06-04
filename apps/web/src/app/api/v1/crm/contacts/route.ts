@@ -21,7 +21,7 @@ export const POST = withApiAuth(async (req, ctx) => {
       name: body.name,
       email: body.email,
       phone: body.phone || "",
-      company: body.company || "",
+      companyId: body.companyId || null,
       status: body.status || "lead",
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),

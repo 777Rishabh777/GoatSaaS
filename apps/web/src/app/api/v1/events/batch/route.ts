@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { withApiAuth, handleOptions, API_CORS_HEADERS } from "@/lib/apimiddleware";
 import { logAction } from "@/lib/audit";
+import db from "@/lib/db";
 
 export async function OPTIONS() { return handleOptions(); }
 
@@ -52,7 +53,13 @@ export const POST = withApiAuth(async (req: NextRequest, ctx) => {
       }
     );
 
-    // TODO: Forward to ClickHouse / analytics pipeline when configured
+    // Forward to Telemetry DB if it's a latency event
+    if (ev.event === "api:latency" || ev.event === "telemetry:latency") {
+      const endpoint = ev.properties?.endpoint ?? "/unknown";
+      const latencyMs = typeof ev.properties?.latency_ms === "number" ? ev.properties.latency_ms : 0;
+      await db.insertTelemetry(ctx.orgId, endpoint, latencyMs, ctx.userId);
+    }
+
     accepted++;
   }
 

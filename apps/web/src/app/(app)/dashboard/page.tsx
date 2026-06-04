@@ -4,6 +4,7 @@ import { useAuth } from "@/context/AuthContext";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar } from "recharts";
 import dynamic from "next/dynamic";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 const CloudMap3D = dynamic(() => import("@/components/CloudMap3D"), { ssr: false });
 const KnowledgeBasePanel = dynamic(() => import("@/components/KnowledgeBasePanel"), { ssr: false });
@@ -12,164 +13,16 @@ const OnboardingModal = dynamic(() => import("@/components/OnboardingModal"), { 
 const CrmPanel = dynamic(() => import("@/components/CrmPanel"), { ssr: false });
 const LogisticsPanel = dynamic(() => import("@/components/LogisticsPanel"), { ssr: false });
 const EcommercePanel = dynamic(() => import("@/components/EcommercePanel"), { ssr: false });
+const SaasPanel = dynamic(() => import("@/components/SaasPanel"), { ssr: false });
+const AudirePanel = dynamic(() => import("@/components/AudirePanel"), { ssr: false });
+const ProjectsPanel = dynamic(() => import("@/components/ProjectsPanel"), { ssr: false });
+const LlmSettingsPanel = dynamic(() => import("@/components/SettingsPanel"), { ssr: false });
+const AdminPanel = dynamic(() => import("@/components/AdminPanel"), { ssr: false });
+import GoatLoader from "@/components/GoatLoader";
 
 
 // Dynamic stats are now fetched from the API
 
-// --- Generate 84-day heatmap data (12 weeks) ---
-function generateHeatmapData() {
-  const days: { date: Date; calls: number }[] = [];
-  const now = new Date();
-  now.setHours(0, 0, 0, 0);
-  for (let i = 83; i >= 0; i--) {
-    const d = new Date(now);
-    d.setDate(d.getDate() - i);
-    const dow = d.getDay(); // 0=Sun
-    const isWeekend = dow === 0 || dow === 6;
-    const base = isWeekend ? 300 : 900;
-    const noise = Math.floor((Math.random() - 0.3) * 800);
-    const spike = Math.random() > 0.85 ? Math.floor(Math.random() * 1200) : 0;
-    days.push({ date: d, calls: Math.max(0, base + noise + spike) });
-  }
-  return days;
-}
-
-const HEATMAP_DATA = generateHeatmapData();
-
-function ActivityHeatmap() {
-  const [tooltip, setTooltip] = useState<{ x: number; y: number; date: Date; calls: number } | null>(null);
-
-  const DAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-  const maxCalls = Math.max(...HEATMAP_DATA.map(d => d.calls));
-
-  // Split into 12 columns (weeks)
-  const weeks: { date: Date; calls: number }[][] = [];
-  for (let w = 0; w < 12; w++) {
-    weeks.push(HEATMAP_DATA.slice(w * 7, w * 7 + 7));
-  }
-
-  const intensity = (calls: number) => {
-    if (calls === 0) return 0;
-    const pct = calls / maxCalls;
-    if (pct < 0.15) return 1;
-    if (pct < 0.35) return 2;
-    if (pct < 0.65) return 3;
-    if (pct < 0.85) return 4;
-    return 5;
-  };
-
-  const cellColor = (lvl: number) => [
-    "bg-zinc-900 border-zinc-800",
-    "bg-purple-950/60 border-purple-900/40",
-    "bg-purple-800/40 border-purple-700/30",
-    "bg-purple-600/50 border-purple-500/40",
-    "bg-purple-500/70 border-purple-400/50",
-    "bg-purple-400 border-purple-300/60",
-  ][lvl];
-
-  // Month markers — show month label on first day of month
-  const monthLabels: { weekIdx: number; label: string }[] = [];
-  weeks.forEach((week, wi) => {
-    week.forEach(day => {
-      if (day.date.getDate() <= 7) {
-        const label = day.date.toLocaleDateString("en-US", { month: "short" });
-        if (!monthLabels.find(m => m.label === label)) {
-          monthLabels.push({ weekIdx: wi, label });
-        }
-      }
-    });
-  });
-
-  return (
-    <div className="glass rounded-2xl border border-[var(--border)] p-6">
-      <div className="flex justify-between items-center mb-5">
-        <div>
-          <h3 className="font-semibold text-[var(--text-primary)]">Activity Heatmap</h3>
-          <p className="text-xs text-[var(--text-secondary)] mt-0.5">API calls per day · last 12 weeks</p>
-        </div>
-        <div className="flex items-center gap-1.5 text-[10px] text-[var(--text-muted)] font-mono">
-          <span>Less</span>
-          {[0,1,2,3,4,5].map(l => (
-            <div key={l} className={`w-3 h-3 rounded-sm border ${cellColor(l)}`} />
-          ))}
-          <span>More</span>
-        </div>
-      </div>
-
-      <div className="flex gap-2">
-        {/* Day-of-week axis */}
-        <div className="flex flex-col gap-[3px] pt-5 flex-shrink-0">
-          {DAY_LABELS.map(d => (
-            <div key={d} className="h-[13px] text-[9px] text-[var(--text-muted)] font-mono flex items-center">
-              {d[0]}
-            </div>
-          ))}
-        </div>
-
-        {/* Heatmap grid */}
-        <div className="flex-1 overflow-x-auto">
-          {/* Month labels */}
-          <div className="flex gap-[3px] mb-1">
-            {weeks.map((_, wi) => {
-              const ml = monthLabels.find(m => m.weekIdx === wi);
-              return (
-                <div key={wi} className="w-[13px] flex-shrink-0 text-[9px] text-[var(--text-muted)] font-mono truncate">
-                  {ml?.label || ""}
-                </div>
-              );
-            })}
-          </div>
-
-          <div className="flex gap-[3px]">
-            {weeks.map((week, wi) => (
-              <div key={wi} className="flex flex-col gap-[3px]">
-                {week.map((day, di) => {
-                  const lvl = intensity(day.calls);
-                  return (
-                    <div
-                      key={di}
-                      className={`w-[13px] h-[13px] rounded-sm border cursor-pointer transition-all duration-100 hover:ring-1 hover:ring-purple-400/60 hover:scale-110 ${cellColor(lvl)}`}
-                      onMouseEnter={e => {
-                        const rect = (e.target as HTMLElement).getBoundingClientRect();
-                        setTooltip({ x: rect.left, y: rect.top, date: day.date, calls: day.calls });
-                      }}
-                      onMouseLeave={() => setTooltip(null)}
-                    />
-                  );
-                })}
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Total call count */}
-      <div className="mt-4 flex items-center justify-between text-[11px] text-[var(--text-muted)] font-mono">
-        <span>{HEATMAP_DATA.reduce((s, d) => s + d.calls, 0).toLocaleString()} total API calls in the last 84 days</span>
-        <span className="text-purple-400">
-          Peak: {Math.max(...HEATMAP_DATA.map(d => d.calls)).toLocaleString()} calls
-        </span>
-      </div>
-
-      {/* Floating tooltip */}
-      {tooltip && (
-        <div
-          className="fixed z-50 pointer-events-none"
-          style={{ left: tooltip.x + 18, top: tooltip.y - 10 }}
-        >
-          <div className="glass rounded-xl border border-[var(--border)] px-3 py-2 text-xs shadow-xl bg-zinc-950/95 whitespace-nowrap">
-            <div className="font-semibold text-[var(--text-primary)]">
-              {tooltip.date.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" })}
-            </div>
-            <div className="text-purple-400 font-mono mt-0.5">
-              {tooltip.calls.toLocaleString()} API calls
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
 
 // Helper functions for CSV and PDF exports
 const exportCsv = (filename: string, data: any[]) => {
@@ -601,15 +454,13 @@ function NlSqlPanel() {
 
 const NAV_ITEMS = [
   { id: "overview", label: "Overview", icon: "📊" },
+  { id: "saas", label: "SaaS Management", icon: "💳" },
   { id: "ecommerce", label: "eCommerce", icon: "🛒" },
   { id: "crm", label: "CRM Pipeline", icon: "🤝" },
-  { id: "logistics", label: "Logistics", icon: "🚚" },
   { id: "ai", label: "AI Analyst", icon: "🤖" },
   { id: "sql", label: "NL→SQL", icon: "⚡" },
-  { id: "knowledge", label: "Knowledge Base", icon: "🧠" },
-  { id: "telemetry", label: "Telemetry", icon: "📡" },
-  { id: "cloud", label: "Cloud Map", icon: "🌐" },
   { id: "settings", label: "Settings", icon: "⚙️" },
+  { id: "admin", label: "Admin Panel", icon: "👑" },
 ];
 
 function PasswordChangeForm() {
@@ -733,17 +584,28 @@ function SettingsPanel() {
 
   const handleUpgrade = async (planId: string) => {
     try {
-      const res = await fetch("http://localhost:8000/api/v1/billing/checkout", {
+      const res = await fetch("/api/billing/checkout", {
         method: "POST",
-        headers: { "Content-Type": "application/json", "X-Org-Id": user?.orgName || "default_org" },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ plan_id: planId })
       });
       const data = await res.json();
-      if (data.url) window.location.href = data.url;
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert(data.error || "Failed to start checkout.");
+      }
     } catch {
       alert("Failed to connect to billing service.");
     }
   };
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.location.search.includes("success=true")) {
+      alert("Billing updated successfully!");
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, []);
 
   useEffect(() => {
     if (subTab === "team") fetchOrgData();
@@ -1059,23 +921,30 @@ function SettingsPanel() {
           <button onClick={() => setSubTab("notifications")} className={`sidebar-item w-full text-left ${subTab === "notifications" ? "active" : ""}`}>
             🔔 Notifications
           </button>
-          <button onClick={() => setSubTab("billing")} className={`sidebar-item w-full text-left ${subTab === "billing" ? "active" : ""}`}>
-            💳 Billing & Plan
-          </button>
-          <div className="my-1 border-t border-[var(--border)] opacity-40" />
-          <div className="px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">Developer</div>
-          <button onClick={() => setSubTab("apiKeys")} className={`sidebar-item w-full text-left ${subTab === "apiKeys" ? "active" : ""}`}>
-            🔑 API Keys
-          </button>
-          <button onClick={() => setSubTab("database")} className={`sidebar-item w-full text-left ${subTab === "database" ? "active" : ""}`}>
-            🗄️ Database
-          </button>
-          <button onClick={() => setSubTab("webhooks")} className={`sidebar-item w-full text-left ${subTab === "webhooks" ? "active" : ""}`}>
-            🔗 Webhooks
-          </button>
-          <a href="/docs" target="_blank" rel="noopener noreferrer" className="sidebar-item w-full text-left text-purple-400">
-            📖 API Docs
-          </a>
+          {isOwnerOrAdmin && (
+            <>
+              <button onClick={() => setSubTab("billing")} className={`sidebar-item w-full text-left ${subTab === "billing" ? "active" : ""}`}>
+                💳 Billing & Plan
+              </button>
+              <div className="my-1 border-t border-[var(--border)] opacity-40" />
+              <div className="px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">Developer</div>
+              <button onClick={() => setSubTab("apiKeys")} className={`sidebar-item w-full text-left ${subTab === "apiKeys" ? "active" : ""}`}>
+                🔑 API Keys
+              </button>
+              <button onClick={() => setSubTab("llm")} className={`sidebar-item w-full text-left ${subTab === "llm" ? "active" : ""}`}>
+                🧠 LLM Provider
+              </button>
+              <button onClick={() => setSubTab("database")} className={`sidebar-item w-full text-left ${subTab === "database" ? "active" : ""}`}>
+                🗄️ Database
+              </button>
+              <button onClick={() => setSubTab("webhooks")} className={`sidebar-item w-full text-left ${subTab === "webhooks" ? "active" : ""}`}>
+                🔗 Webhooks
+              </button>
+              <a href="/docs" target="_blank" rel="noopener noreferrer" className="sidebar-item w-full text-left text-purple-400">
+                📖 API Docs
+              </a>
+            </>
+          )}
         </div>
 
         {/* Settings Content */}
@@ -1383,6 +1252,13 @@ function SettingsPanel() {
                   )}
                 </div>
               </div>
+            </div>
+          )}
+
+          {/* ── LLM SUB-TAB ──────────────────────────────────────────────── */}
+          {subTab === "llm" && (
+            <div className="space-y-6">
+              <LlmSettingsPanel />
             </div>
           )}
 
@@ -1695,7 +1571,14 @@ function SettingsPanel() {
 
 
 export default function DashboardPage() {
-  const { user, logout } = useAuth();
+  const { user, loading, logout } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!loading && !user) {
+      window.location.href = "/sign-in";
+    }
+  }, [user, loading]);
   const [tab, setTab] = useState("overview");
   const [livePlan, setLivePlan] = useState(user?.plan || "free");
 
@@ -1805,27 +1688,30 @@ export default function DashboardPage() {
     }
   };
 
-  if (!user) return null;
+  if (loading) {
+    return <GoatLoader message="Loading Dashboard..." />;
+  }
 
+  if (!user) {
+    return <GoatLoader message="Redirecting to sign in..." />;
+  }
   return (
     <div className="min-h-screen bg-[var(--bg-0)] text-[var(--text-primary)] transition-colors duration-300 flex overflow-hidden">
       <OnboardingModal />
       {/* Desktop Sidebar */}
 
       <aside className="w-60 flex-shrink-0 border-r border-zinc-900 hidden md:flex flex-col p-4 bg-zinc-950 font-sans">
-        <div className="flex items-center gap-3 mb-8 px-2">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center text-white font-black text-sm">G</div>
-          <span className="font-bold text-white">GOAT<span className="text-purple-400">SaaS</span></span>
+        <div className="flex items-center mb-8 px-2">
+          <img src="/logo.png" alt="GOATSaaS Logo" className="h-16 w-auto object-contain drop-shadow-md" />
         </div>
 
         <nav className="space-y-1 flex-1">
-          {NAV_ITEMS.map(item => (
+          {NAV_ITEMS.filter(item => item.id !== "admin" || user?.role === "admin").map(item => (
             <button key={item.id} onClick={() => setTab(item.id)} className={`sidebar-item w-full text-left ${tab === item.id ? "active" : ""}`}>
               <span>{item.icon}</span>
               <span>{item.label}</span>
             </button>
           ))}
-
         </nav>
 
         <div className="border-t border-zinc-900 pt-4 mt-4">
@@ -1859,9 +1745,8 @@ export default function DashboardPage() {
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden transition-all duration-300" onClick={() => setMobileSidebarOpen(false)}>
           <aside className="w-64 h-full flex flex-col p-4 bg-zinc-950 font-sans border-r border-zinc-900 relative" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-8 px-2">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center text-white font-black text-sm">G</div>
-                <span className="font-bold text-white">GOAT<span className="text-purple-400">SaaS</span></span>
+              <div className="flex items-center">
+                <img src="/logo.png" alt="GOATSaaS Logo" className="h-16 w-auto object-contain drop-shadow-md" />
               </div>
               <button 
                 onClick={() => setMobileSidebarOpen(false)}
@@ -1872,7 +1757,7 @@ export default function DashboardPage() {
             </div>
 
             <nav className="space-y-1 flex-1">
-              {NAV_ITEMS.map(item => (
+              {NAV_ITEMS.filter(item => item.id !== "admin" || user?.role === "admin").map(item => (
                 <button 
                   key={item.id} 
                   onClick={() => { setTab(item.id); setMobileSidebarOpen(false); }} 
@@ -1882,7 +1767,6 @@ export default function DashboardPage() {
                   <span>{item.label}</span>
                 </button>
               ))}
-
             </nav>
 
             <div className="border-t border-zinc-900 pt-4 mt-4">
@@ -2008,6 +1892,18 @@ export default function DashboardPage() {
             {tab === "crm" && (
               <CrmPanel />
             )}
+
+            {tab === "saas" && (
+              <SaasPanel />
+            )}
+
+            {tab === "projects" && (
+              <ProjectsPanel />
+            )}
+
+            {tab === "audire" && (
+              <AudirePanel />
+            )}
             
             {tab === "overview" && (
               <div className="space-y-8 fade-in-up">
@@ -2074,9 +1970,6 @@ export default function DashboardPage() {
                   </div>
                 </div>
 
-                {/* Activity Heatmap */}
-                <ActivityHeatmap />
-
                 {/* Recent Activity Section */}
                 <div className="glass rounded-2xl border border-[var(--border)] p-6">
                   <div className="flex justify-between items-center mb-4">
@@ -2107,10 +2000,16 @@ export default function DashboardPage() {
             {tab === "ai" && (
               <div className="space-y-6 fade-in-up">
                 <div>
-                  <h1 className="text-2xl font-bold text-[var(--text-primary)]">AI Business Analyst 🤖</h1>
-                  <p className="text-[var(--text-secondary)] text-sm mt-1">Chat with your data in real-time using multiple model integrations.</p>
+                  <h1 className="text-2xl font-bold text-[var(--text-primary)]">Pyro AI 🐐</h1>
+                  <p className="text-[var(--text-secondary)] text-sm mt-1">Your AI Business Analyst has been upgraded to a global platform widget.</p>
                 </div>
-                <AiChatPanel />
+                <div className="glass rounded-2xl border border-[var(--border)] p-12 flex flex-col items-center justify-center text-center mt-8">
+                  <div className="text-5xl animate-bounce mb-4">🐐</div>
+                  <h3 className="text-xl font-bold text-white mb-2">Look to your bottom right!</h3>
+                  <p className="text-zinc-400 max-w-md">
+                    Pyro AI is now a persistent, intelligent chatbot widget available on every single page of the dashboard. Click the floating green goat icon in the corner to chat with your real database anytime!
+                  </p>
+                </div>
               </div>
             )}
 
@@ -2151,6 +2050,10 @@ export default function DashboardPage() {
 
             {tab === "settings" && (
               <SettingsPanel />
+            )}
+
+            {tab === "admin" && (
+              <AdminPanel />
             )}
           </div>
         </main>

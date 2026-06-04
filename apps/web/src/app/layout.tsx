@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import { AuthProvider } from "@/context/AuthContext";
 import "./globals.css";
+import PyroWidget from "@/components/PyroWidget";
 
 export const metadata: Metadata = {
-  title: "GOAT SaaS — The Autonomous AI Command Center",
-  description: "The most advanced AI SaaS dashboard. Real-time analytics, NL→SQL, 3D cloud infrastructure, and AI-powered diagnostics.",
-  keywords: "AI dashboard, SaaS analytics, cloud monitoring, NL to SQL, AI diagnostics",
+  title: "GoatSaaS — Developer Platform & Dashboard",
+  description:
+    "Manage every SaaS subscription in one place and run AI readiness audits with Audire. Track renewals, optimize spend, and improve AI visibility.",
+  keywords: "SaaS spend dashboard, subscription management, renewal tracking, AI readiness audit, Audire",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -19,6 +21,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <AuthProvider>
           {children}
+          <PyroWidget />
         </AuthProvider>
       </body>
     </html>

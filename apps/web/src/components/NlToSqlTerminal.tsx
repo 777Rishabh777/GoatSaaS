@@ -48,65 +48,34 @@ export default function NlToSqlTerminal() {
     setTableData([]);
     setColumns([]);
     setDbError("");
-    
-    let fullGeneratedSql = "";
+
+    const llmProvider = localStorage.getItem("LLM_PROVIDER");
+    const llmKey = localStorage.getItem("LLM_API_KEY");
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
+    if (llmProvider) headers["X-LLM-Provider"] = llmProvider;
+    if (llmKey) headers["X-LLM-Key"] = llmKey;
 
     try {
-      const res = await fetch("http://localhost:8000/api/v1/ai/natural-sql", {
+      const res = await fetch("/api/v1/ai/natural-sql", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({
           natural_query: query,
           database_schema_context: "Table 'users' (id, email, plan_type, created_at), Table 'telemetry' (id, user_id, endpoint, latency_ms, timestamp)",
         }),
       });
 
-      if (!res.body) throw new Error("No response body");
-
-      const reader = res.body.getReader();
-      const decoder = new TextDecoder();
-      let done = false;
-
-      while (!done) {
-        const { value, done: doneReading } = await reader.read();
-        done = doneReading;
-        if (value) {
-          const chunk = decoder.decode(value, { stream: true });
-          const lines = chunk.split('\n');
-          
-          for (const line of lines) {
-            if (line.trim() === '' || line.trim() === 'data: [DONE]') continue;
-            
-            if (line.startsWith('data: ')) {
-              const dataStr = line.slice(6);
-              try {
-                const data = JSON.parse(dataStr);
-                if (data.choices && data.choices[0].delta && data.choices[0].delta.content) {
-                  const token = data.choices[0].delta.content;
-                  fullGeneratedSql += token;
-                  
-                  // REAL-TIME MARKDOWN STRIPPER: Instantly cleans the UI as it streams
-                  const cleanDisplay = fullGeneratedSql
-                    .replace(/```sql\n?/gi, "")
-                    .replace(/```\n?/g, "")
-                    .trimStart();
-                    
-                  setSqlOutput(cleanDisplay);
-                }
-              } catch (e) {
-                if (!dataStr.startsWith('{')) {
-                   fullGeneratedSql += dataStr + '\n';
-                   setSqlOutput((prev) => prev + dataStr + '\n');
-                }
-              }
-            }
-          }
-        }
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setSqlOutput(data.sql);
+      } else {
+        setSqlOutput("-- ERROR: " + (data.error || "Generation failed"));
       }
-      
-
     } catch (error) {
-      setSqlOutput("-- ERROR: Could not connect to Python AI Router.");
+      setSqlOutput("-- ERROR: Could not connect to AI API.");
     } finally {
       setIsGenerating(false);
     }

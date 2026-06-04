@@ -1,7 +1,10 @@
 "use client";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useAuth } from "@/context/AuthContext";
+import dynamic from "next/dynamic";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import GoatLoader from "@/components/GoatLoader";
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, Legend
 } from "recharts";
@@ -790,7 +793,18 @@ function SystemHealthPanel({ anomalyConfig, setAnomalyConfig, savingConfig, save
 
 // ─── Main Admin Page ──────────────────────────────────────────────────────────
 export default function AdminPage() {
-  const { user, logout } = useAuth();
+  const { user, loading, logout } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!loading) {
+      if (!user) {
+        router.push("/admin-login");
+      } else if (user.role !== "admin") {
+        router.push("/dashboard");
+      }
+    }
+  }, [user, loading, router]);
   const [users, setUsers] = useState<UserRow[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(true);
   const [tab, setTab] = useState("overview");
@@ -910,7 +924,11 @@ export default function AdminPage() {
     (planFilter ? u.plan === planFilter : true)
   );
 
-  if (!user) return null;
+  if (loading || !user) {
+    return <GoatLoader message="Authenticating Admin..." />;
+  }
+
+  if (!user || user.role !== "admin") return null;
 
   const NAV = [
     { id: "overview",  label: "Overview",       icon: "📊" },

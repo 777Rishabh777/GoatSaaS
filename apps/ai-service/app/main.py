@@ -33,6 +33,9 @@ class NeuralRoutingConfig:
     DATABASE_URL = os.getenv("DATABASE_URL", "").strip('"' + "'")
     GROQ_ENDPOINT = "https://api.groq.com/openai/v1/chat/completions"
 
+from app.routers import projects
+app.include_router(projects.router)
+
 class DiagnosticPayload(BaseModel):
     metric_name: str
     current_value: float
@@ -91,6 +94,14 @@ async def init_db():
                 message TEXT NOT NULL,
                 timestamp TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
                 resolved BOOLEAN DEFAULT FALSE
+            );
+
+            CREATE TABLE IF NOT EXISTS telemetry (
+                id SERIAL PRIMARY KEY,
+                org_id VARCHAR(50) NOT NULL DEFAULT 'default_org',
+                endpoint VARCHAR(255) NOT NULL,
+                latency_ms INTEGER NOT NULL,
+                timestamp TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP
             );
 
             CREATE TABLE IF NOT EXISTS billing_subscriptions (
@@ -185,6 +196,24 @@ async def background_anomaly_detector():
 @app.on_event("startup")
 async def startup_event():
     await init_db()
+    # Ensure telemetry table exists before starting background worker
+    try:
+        if NeuralRoutingConfig.DATABASE_URL:
+            conn = await asyncpg.connect(NeuralRoutingConfig.DATABASE_URL)
+            await conn.execute("""
+                CREATE TABLE IF NOT EXISTS telemetry (
+                    id SERIAL PRIMARY KEY,
+                    org_id VARCHAR(50) NOT NULL DEFAULT 'default_org',
+                    endpoint VARCHAR(255) NOT NULL,
+                    latency_ms INTEGER NOT NULL,
+                    timestamp TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP
+                );
+            """)
+            await conn.close()
+            print("Ensured telemetry table exists.")
+    except Exception as e:
+        print(f"Could not ensure telemetry table: {e}")
+
     asyncio.create_task(background_anomaly_detector())
 
 # --- RAG SUPPORTIVE METHODS ---

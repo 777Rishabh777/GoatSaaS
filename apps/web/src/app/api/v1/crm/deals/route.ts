@@ -22,6 +22,7 @@ export const POST = withApiAuth(async (req, ctx) => {
       title: body.title,
       amount: Number(body.amount) || 0,
       stage: body.stage || "prospecting",
+      probability: Number(body.probability) || 50,
       expectedCloseDate: body.expectedCloseDate || null,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
