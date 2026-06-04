@@ -3,6 +3,9 @@ import jwt from "jsonwebtoken";
 function getJwtSecret(): string {
   const secret = process.env.NEXTAUTH_SECRET || process.env.JWT_SECRET;
   if (!secret) {
+    if (process.env.NODE_ENV !== "production") {
+      return "fallback-dev-secret-do-not-use-in-prod";
+    }
     throw new Error("Missing NEXTAUTH_SECRET (or JWT_SECRET) in apps/web/.env.local");
   }
   return secret;
