@@ -47,6 +47,8 @@ function SignInContent() {
       if (result.error) {
         setError(result.error);
         setLoading(false);
+      } else {
+        setTimeout(() => setLoading(false), 5000);
       }
     } catch (err) {
       setError("Cannot connect to server. Please wait and try again.");
