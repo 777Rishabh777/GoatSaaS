@@ -85,11 +85,6 @@ export async function POST(req: NextRequest) {
   } catch (err) {
     console.error("[Login]", err);
 
-    const isDev = process.env.NODE_ENV !== "production";
-    if (!isDev) {
-      return NextResponse.json({ error: "Internal server error" }, { status: 500 });
-    }
-
     const detail = err instanceof Error ? err.message : String(err);
     const code = (err as any)?.code as string | undefined;
 
