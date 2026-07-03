@@ -2,30 +2,30 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { path: string[] } }
+  { params }: { params: Promise<{ path: string[] }> }
 ) {
-  return handleProxy(req, params.path);
+  return handleProxy(req, (await params).path);
 }
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { path: string[] } }
+  { params }: { params: Promise<{ path: string[] }> }
 ) {
-  return handleProxy(req, params.path);
+  return handleProxy(req, (await params).path);
 }
 
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { path: string[] } }
+  { params }: { params: Promise<{ path: string[] }> }
 ) {
-  return handleProxy(req, params.path);
+  return handleProxy(req, (await params).path);
 }
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { path: string[] } }
+  { params }: { params: Promise<{ path: string[] }> }
 ) {
-  return handleProxy(req, params.path);
+  return handleProxy(req, (await params).path);
 }
 
 async function handleProxy(req: NextRequest, path: string[]) {
