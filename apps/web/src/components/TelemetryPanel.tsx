@@ -36,7 +36,7 @@ interface ExplainState {
   [anomalyId: number]: { open: boolean; text: string; loading: boolean };
 }
 
-const API = "http://localhost:8000";
+const API = "/api/ai-proxy";
 
 const TOOLTIP_STYLE = {
   background: "rgba(10,10,15,0.97)",

@@ -825,8 +825,8 @@ export default function AdminPage() {
     setKbLoading(true);
     try {
       const [statsRes, docsRes] = await Promise.allSettled([
-        fetch("http://localhost:8000/api/v1/rag/stats"),
-        fetch("http://localhost:8000/api/v1/rag/documents"),
+        fetch("/api/ai-proxy/v1/rag/stats"),
+        fetch("/api/ai-proxy/v1/rag/documents"),
       ]);
       if (statsRes.status === "fulfilled" && statsRes.value.ok) setKbStats(await statsRes.value.json());
       if (docsRes.status === "fulfilled" && docsRes.value.ok) {
@@ -841,8 +841,8 @@ export default function AdminPage() {
     setTelLoading(true);
     try {
       const [statsRes, alertsRes] = await Promise.allSettled([
-        fetch("http://localhost:8000/api/v1/anomalies/stats"),
-        fetch("http://localhost:8000/api/v1/anomalies/alerts"),
+        fetch("/api/ai-proxy/v1/anomalies/stats"),
+        fetch("/api/ai-proxy/v1/anomalies/alerts"),
       ]);
       if (statsRes.status === "fulfilled" && statsRes.value.ok) setTelStats(await statsRes.value.json());
       if (alertsRes.status === "fulfilled" && alertsRes.value.ok) {
@@ -859,7 +859,7 @@ export default function AdminPage() {
   }, [tab, fetchKb, fetchTel]);
 
   useEffect(() => {
-    fetch("http://localhost:8000/api/v1/anomalies/config")
+    fetch("/api/ai-proxy/v1/anomalies/config")
       .then(r => r.json())
       .then(d => setAnomalyConfig({ z_score_threshold: d.z_score_threshold }))
       .catch(() => {});
@@ -868,7 +868,7 @@ export default function AdminPage() {
   const saveAnomalyConfig = async () => {
     setSavingConfig(true);
     try {
-      await fetch("http://localhost:8000/api/v1/anomalies/config", {
+      await fetch("/api/ai-proxy/v1/anomalies/config", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(anomalyConfig)

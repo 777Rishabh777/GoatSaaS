@@ -137,7 +137,7 @@ function AiChatPanel() {
   const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
-    fetch("http://localhost:8000/api/v1/rag/stats", { headers: { "X-Org-Id": orgId } }).then(r => r.json()).then(d => setRagStats(d)).catch(() => {});
+    fetch("/api/ai-proxy/v1/rag/stats", { headers: { "X-Org-Id": orgId } }).then(r => r.json()).then(d => setRagStats(d)).catch(() => {});
   }, [orgId]);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -147,8 +147,8 @@ function AiChatPanel() {
     const fd = new FormData();
     fd.append("file", file);
     try {
-      await fetch("http://localhost:8000/api/v1/rag/upload", { method: "POST", headers: { "X-Org-Id": orgId }, body: fd });
-      const stats = await fetch("http://localhost:8000/api/v1/rag/stats", { headers: { "X-Org-Id": orgId } }).then(r => r.json());
+      await fetch("/api/ai-proxy/v1/rag/upload", { method: "POST", headers: { "X-Org-Id": orgId }, body: fd });
+      const stats = await fetch("/api/ai-proxy/v1/rag/stats", { headers: { "X-Org-Id": orgId } }).then(r => r.json());
       setRagStats(stats);
       setMessages(p => [...p, { role: "assistant", content: `Successfully indexed ${file.name} to the Knowledge Base.` }]);
     } catch {
@@ -170,7 +170,7 @@ function AiChatPanel() {
     setMessages(p => [...p, { role: "user", content: userMsg }]);
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:8000/api/v1/ai/diagnostic-explain", {
+      const res = await fetch("/api/ai-proxy/v1/ai/diagnostic-explain", {
         method: "POST",
         headers: { "Content-Type": "application/json", "X-Org-Id": orgId },
         body: JSON.stringify({ 
@@ -307,7 +307,7 @@ function NlSqlPanel() {
     if (!activeQuery.trim()) return;
     setLoading(true); setResult("");
     try {
-      const res = await fetch("http://localhost:8000/api/v1/ai/natural-sql", {
+      const res = await fetch("/api/ai-proxy/v1/ai/natural-sql", {
         method: "POST",
         headers: { "Content-Type": "application/json", "X-Org-Id": orgId },
         body: JSON.stringify({ 
@@ -409,7 +409,7 @@ function NlSqlPanel() {
         </div>
 
         <div className="p-4 space-y-3 flex-1 flex flex-col justify-between">
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2">
             <input 
               value={query} 
               onChange={e => setQuery(e.target.value)} 
@@ -417,16 +417,18 @@ function NlSqlPanel() {
               className="input-dark flex-1 rounded-xl px-3 py-2 text-sm font-mono" 
               placeholder="Show me top 10 users by revenue this month..." 
             />
-            <button onClick={() => run()} disabled={loading} className="bg-purple-650 hover:bg-purple-500 text-white px-4 py-2 rounded-xl text-sm font-medium transition-all disabled:opacity-50 flex items-center justify-center min-w-[60px]">{loading ? "..." : "Run"}</button>
-            {query.trim() && (
-              <button onClick={() => setShowSaveDialog(true)} className="btn-ghost border border-[var(--border)] text-zinc-350 hover:text-white px-3 py-2 rounded-xl text-sm font-medium transition-all" title="Save query">
-                ⭐
-              </button>
-            )}
+            <div className="flex gap-2">
+              <button onClick={() => run()} disabled={loading} className="flex-1 sm:flex-none bg-purple-650 hover:bg-purple-500 text-white px-4 py-2 rounded-xl text-sm font-medium transition-all disabled:opacity-50 flex items-center justify-center min-w-[60px]">{loading ? "..." : "Run"}</button>
+              {query.trim() && (
+                <button onClick={() => setShowSaveDialog(true)} className="btn-ghost border border-[var(--border)] text-zinc-350 hover:text-white px-3 py-2 rounded-xl text-sm font-medium transition-all" title="Save query">
+                  ⭐
+                </button>
+              )}
+            </div>
           </div>
 
           {showSaveDialog && (
-            <div className="p-3 bg-[var(--bg-card)] border border-purple-500/30 rounded-xl flex gap-2 items-center fade-in-up">
+            <div className="p-3 bg-[var(--bg-card)] border border-purple-500/30 rounded-xl flex flex-col sm:flex-row gap-2 items-center fade-in-up">
               <input 
                 value={newQueryName} 
                 onChange={e => setNewQueryName(e.target.value)} 
@@ -1631,7 +1633,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (user) {
-      fetch("http://localhost:8000/api/v1/billing/status", {
+      fetch("/api/ai-proxy/v1/billing/status", {
         headers: { "X-Org-Id": user?.orgName || "default_org" }
       }).then(r => r.json()).then(d => { if (d.plan) setLivePlan(d.plan); }).catch(()=>{});
     }
@@ -1641,7 +1643,7 @@ export default function DashboardPage() {
     const orgId = user?.orgName || "default_org";
     const fetchAlerts = async () => {
       try {
-        const res = await fetch("http://localhost:8000/api/v1/anomalies/alerts", {
+        const res = await fetch("/api/ai-proxy/v1/anomalies/alerts", {
           headers: { "X-Org-Id": orgId }
         });
         const alerts = await res.json();
@@ -1677,7 +1679,7 @@ export default function DashboardPage() {
 
   const simulateAnomaly = async () => {
     try {
-      await fetch("http://localhost:8000/api/v1/db/simulate-anomaly", { 
+      await fetch("/api/ai-proxy/v1/db/simulate-anomaly", { 
         method: "POST",
         headers: { "Content-Type": "application/json", "X-Org-Id": user?.orgName || "default_org" },
         body: JSON.stringify({})

@@ -29,7 +29,7 @@ interface UploadingFile {
   chunks?: number;
 }
 
-const API = "http://localhost:8000";
+const API = "/api/ai-proxy";
 
 export default function KnowledgeBasePanel() {
   const { user } = useAuth();

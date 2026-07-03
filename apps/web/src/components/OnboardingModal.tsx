@@ -65,7 +65,7 @@ export default function OnboardingModal() {
     try {
       const fd = new FormData();
       fd.append("file", file);
-      await fetch("http://localhost:8000/api/v1/rag/upload", {
+      await fetch("/api/ai-proxy/v1/rag/upload", {
         method: "POST",
         headers: { "X-Org-Id": user?.orgName ?? "default_org" },
         body: fd,

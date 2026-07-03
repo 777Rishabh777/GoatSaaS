@@ -19,7 +19,7 @@ export default function NlToSqlTerminal() {
     setColumns([]);
     
     try {
-      const res = await fetch("http://localhost:8000/api/v1/db/execute", {
+      const res = await fetch("/api/ai-proxy/v1/db/execute", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ sql_query: sql }),
@@ -88,7 +88,7 @@ export default function NlToSqlTerminal() {
           <label className="text-xs font-mono text-neutral-500 uppercase tracking-widest">
             Natural Language Query Intent
           </label>
-          <div className="flex space-x-3">
+          <div className="flex flex-col sm:flex-row gap-3">
             <input
               type="text"
               value={query}
@@ -98,7 +98,7 @@ export default function NlToSqlTerminal() {
             <button
               type="submit"
               disabled={isGenerating || !query}
-              className="bg-purple-600 hover:bg-purple-500 text-white px-6 py-2 rounded-lg text-sm font-semibold transition-colors disabled:opacity-50"
+              className="bg-purple-600 hover:bg-purple-500 text-white px-6 py-2 rounded-lg text-sm font-semibold transition-colors disabled:opacity-50 w-full sm:w-auto"
             >
               {isGenerating ? "Translating..." : "Generate"}
             </button>
